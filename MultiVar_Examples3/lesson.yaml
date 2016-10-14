@@ -1,0 +1,209 @@
+- Class: meta
+  Course: Regression_Models
+  Lesson: MultiVar_Examples3
+  Author: Swirl Coders
+  Type: Coursera
+  Organization: Johns Hopkins Bloomberg School of Public Health
+  Version: 2.2.0
+
+- Class: text
+  Output: "多变量的例子3. (Slides for this and other Data Science courses may be found at github https://github.com/DataScienceSpecialization/courses. If you care to use them, they must be downloaded as a zip file and viewed locally. This lesson corresponds to Regression_Models/02_02_multivariateExamples.)"
+
+- Class: text
+  Output: 这是我们学习多元回归模型的第三节课也是最后一节课。我们将从数据集WHO hunger开始。数据WHO是来源于世界健康组织，他的数据关心全世界的少年儿童和评估他们经受饥饿程度，这些数据是有世界健康组织在数年间收集的。原来的csv文件是非常大的，我们选取的其中的子集，这些子集可以判明这些儿童是男的还是女的。我们已经为你读取数据hunger。
+  
+- Class: cmd_question
+  Output: 就像我们前一节课所做的，首先我们需要对这个数据集有更多的了解。用函数dim去查看hunger的规模。
+  CorrectAnswer: dim(hunger)
+  AnswerTests: omnitest(correctExpr='dim(hunger)')
+  Hint: 输入 "dim(hunger)" 
+
+- Class: exact_question
+  Output: Hunger里面有多少样本？
+  CorrectAnswer: 948
+  AnswerTests: omnitest(correctVal=948)
+  Hint: dim函数会返回两个数，一个是行一个是列。每一行都代表一个样本。
+  
+- Class: cmd_question
+  Output: 用函数names去查找hunger的13列代表着什么？
+  CorrectAnswer: names(hunger)
+  AnswerTests: omnitest(correctExpr='names(hunger)')
+  Hint: 输入 "names(hunger)"
+
+- Class: text
+  Output: Numeric列里面的详细每行的消息告诉我们在样本中低于5岁的孩子的体重偏轻的百分数。这列我们将会在这一节课里面给予充分的关注。它将会是我们构造的模型的被解释变量。
+  
+- Class: cmd_question
+  Output: 首先考虑hunger的比率，看看它是如何随时间变化的，用lm函数的构造一个线性模型，以Numeric作为被解释变量，year作为解释变量，结果保存在fit中。
+  CorrectAnswer: fit <- lm(hunger$Numeric ~ hunger$Year)
+  AnswerTests: creates_lm_model('fit <- lm(hunger$Numeric ~ hunger$Year)')
+  Hint: 你需要在模型中输入一个方程（dependent ~ independent）。同样地，如果你不清楚你需要输入在方差里的变量，你也要指明是哪个数据集。输入fit <- lm(Numeric ~ Year, hunger)或fit <- lm(hunger$Numeric ~ hunger$Year)
+  
+- Class: cmd_question
+  Output: 现在看一下fit的参数部分，用summary函数。
+  CorrectAnswer: summary(fit)$coef
+  AnswerTests: omnitest(correctExpr='summary(fit)$coef')
+  Hint: 输入 "summary(fit)$coef" 
+
+- Class: mult_question
+  Output: hunger$Year的系数是多少？
+  AnswerChoices: -0.30840; 0.06053; 634.47966;  121.14460
+  CorrectAnswer: -0.30840
+  AnswerTests: omnitest(correctVal='-0.30840')
+  Hint: 在summary的输出中看到hunger$Year 的行和 Estimate 这一列。
+
+- Class: mult_question
+  Output: hunger$Year的负的估计值代表什么？
+  AnswerChoices: As time goes on, the rate of hunger decreases; As time goes on, the rate of hunger increases; I haven't a clue
+  CorrectAnswer: As time goes on, the rate of hunger decreases
+  AnswerTests: omnitest(correctVal='As time goes on, the rate of hunger decreases')
+  Hint: 回想起回归线的斜率的意义。对于解释变量Year的每一单位的改变会让被解释变量(percentage of hungry children)降低0.3084。
+  
+- Class: mult_question
+  Output: 模型的截距代表什么？
+  AnswerChoices: the percentage of hungry children at year 0; the number of hungry children at year 0; the number of children questioned in the survey
+  CorrectAnswer: the percentage of hungry children at year 0
+  AnswerTests: omnitest(correctVal='the percentage of hungry children at year 0')
+  Hint: 数字给出的是hungry children的百分数而斜率是先于坐标轴的交叉点，这个坐标轴表示为0的值。
+  
+- Class: cmd_question
+  Output: 用R构造子集的能力查看一下不同性别hunger的比率去发现他们有什么不同？再次用lm函数去构造一个线性模型，以女童的Numeric作为被解释变量，Year作为解释变量。把结果储存在变量lmF中。你会用到结构x[hunger$Sex=="Female"]去挑选出女童的Numeric和Year。
+  CorrectAnswer: lmF <- lm(hunger$Numeric[hunger$Sex=="Female"] ~ hunger$Year[hunger$Sex=="Female"])
+  AnswerTests: creates_lm_model('lmF <- lm(hunger$Numeric[hunger$Sex=="Female"] ~ hunger$Year[hunger$Sex==\"Female\"])')
+  Hint: 输入 lmF <- lm(hunger$Numeric[hunger$Sex=="Female"] ~ hunger$Year[hunger$Sex=="Female"]) 或 lmF <- lm(Numeric[Sex=="Female"] ~ Year[Sex=="Female"],hunger)
+
+- Class: cmd_question
+  Output: 用同样的方法对男童的数据进行类似回归，把结果储存在变量lmM中
+  CorrectAnswer: lmM <- lm(hunger$Numeric[hunger$Sex=="Male"] ~ hunger$Year[hunger$Sex=="Male"])
+  AnswerTests: creates_lm_model('lmM <- lm(hunger$Numeric[hunger$Sex=="Male"] ~ hunger$Year[hunger$Sex=="Male"])')
+  Hint: 输入 lmM <- lm(hunger$Numeric[hunger$Sex=="Male"] ~ hunger$Year[hunger$Sex=="Male"]) 或 lmM <- lm(Numeric[Sex=="Male"] ~ Year[Sex=="Male"],hunger)
+
+- Class: figure
+  Output: 我们现在把数据点和回归线画到图中，用不同颜色为了区分男女童，其中男童（蓝色）女童（粉色）。
+  Figure: plot1.R
+  FigureType: new
+
+- Class: mult_question
+  Output: 我们可以看到图中的线不是严格的平行的。在图右手边（2010年），它们比1970年的时候更加靠近。由于他们不是平行的，他们的斜率肯定不同，但两斜率都是负数。以下那个R表达式确定男童回归线的斜率是负数呢？
+  AnswerChoices: lmM$coef[2]; lmF$coef[2]; lmM$coef[1] 
+  CorrectAnswer:  lmM$coef[2]
+  AnswerTests: omnitest(correctVal='lmM$coef[2]')
+  Hint: 首先，在引用males后就排除female的选项。其次，第一个参数是线的截距第二个参数是斜率。
+  
+- Class: text
+  Output: 现在我们不再用性别把样本划成子集，我们将把性别作为另一个自变量去构造一个线性模型lmBoth.我们在R里面用“+”去连接解释变量。所以方差的形式应该是被解释变量 ~ 解释变量1 + 解释变量2.
+  
+- Class: cmd_question
+  Output:  现在生成lmBoth。Numeric是被解释变量，Year和sex是解释变量，数据集是hunger。对于lmBoth,确保Year排在第一位，Sex排在第二位。
+  CorrectAnswer: lmBoth <- lm(hunger$Numeric ~ hunger$Year + hunger$Sex)
+  AnswerTests: creates_lm_model('lmBoth <- lm(hunger$Numeric ~ hunger$Year + hunger$Sex)')
+  Hint: 输入 lmBoth <- lm(hunger$Numeric ~ hunger$Year + hunger$Sex) 或 lmBoth <- lm(Numeric ~ Year+Sex,hunger)
+
+- Class: cmd_question
+  Output: 现在看一下lmBoth的概括，用summary命令。
+  CorrectAnswer: summary(lmBoth)
+  AnswerTests: omnitest(correctExpr='summary(lmBoth)')
+  Hint: 输入 summary(lmBoth) 
+
+- Class: text
+  Output: 注意到给出的三个估计值，截距、Year和Male的估计值。那么对于Female的估计值呢？注意到男性和女性是分类变量，因此他们是模型里的因素。上一节课中提及到R把第一个因素（按字母排列）作为参照物和它的估计值就是截距，这里就是代表在某年处于饥饿女童的百分比。有因素Male给出的估计值是它离截距（参照组Female的估计值）的距离。去计算第0年处于饥饿男性的百分比，你需要把模型给出的截距和male的估计值加在一起。
+  
+- Class: mult_question
+  Output: 在第0年处于饥饿的年轻男性的百分比时多少？
+  AnswerChoices: 635.431; 1.9027; 633.2199; I can't tell since the data starts at 1970. 
+  CorrectAnswer: 635.431 
+  AnswerTests: omnitest(correctVal='635.431')
+  Hint: 在0年的females hungry的百分比的截距和结局加上hunger$SexMale是males hungry 在第0年的百分比。
+  
+- Class: mult_question
+  Output: hunger$Year的估计值代表什么？
+  AnswerChoices: the annual decrease in percentage of hungry children of both genders; the annual decrease in percentage of hungry females;  the annual decrease in percentage of hungry males;
+  CorrectAnswer: the annual decrease in percentage of hungry children of both genders
+  AnswerTests: omnitest(correctVal='the annual decrease in percentage of hungry children of both genders')
+  Hint: 模型考虑到整个数据但没有指定具体哪种性别进行重点考虑。
+  
+- Class: figure
+  Output: 现在我们重新画出数据点和两条不同颜色的线。红线的截距是female截距，蓝线的截距是male的截距。
+  Figure: parallelplot.R
+  FigureType: new
+
+- Class: mult_question
+  Output: 两条线平行，这是因为
+  AnswerChoices: they have the same slope; they have slopes that are very close; I have no idea
+  CorrectAnswer: they have the same slope
+  AnswerTests: omnitest(correctVal='they have the same slope')
+  Hint: 平行线有相同的斜率。
+
+- Class: text
+  Output: 现在我们关系关心年份和性别之间的相互关系，以用来看他们对hunger的比率的变化有什么影响。为了完成这个任务，我们将添加第三个因素作为我们模型方程的解释变量部分，是年份与性别的乘积。
+  
+- Class: cmd_question
+  Output: 构造模型lmInter,Numeric是因变量，另外三个自变量是Year,Sex和Sex*Year，数据是hunger。
+  CorrectAnswer: lmInter <- lm(hunger$Numeric ~ hunger$Year + hunger$Sex + hunger$Year * hunger$Sex)
+  AnswerTests: creates_lm_model('lmInter <- lm(hunger$Numeric ~ hunger$Year + hunger$Sex + hunger$Year * hunger$Sex)')
+  Hint: 输入 lmInter <- lm(hunger$Numeric ~ hunger$Year + hunger$Sex + hunger$Year * hunger$Sex) 或r lmInter <- lm(Numeric ~ Year + Sex + Year*Sex, hunger)
+
+- Class: cmd_question
+  Output: 现在查看lmInter的概括，用函数summary。
+  CorrectAnswer: summary(lmInter)
+  AnswerTests: omnitest(correctExpr='summary(lmInter)')
+  Hint: 输入 summary(lmInter)
+
+- Class: mult_question
+  Output: 处于0年的饥饿的女性的百分比是多少？
+  AnswerChoices: 603.5058; 61.94772; The model doesn't say.
+  CorrectAnswer: 603.5058
+  AnswerTests: omnitest(correctVal='603.5058')
+  Hint: 前面,斜率是第一个因素的饥饿百分比，在这里是 females 
+
+- Class: mult_question
+  Output: 处于0年的饥饿的男性的百分比是多少？
+  AnswerChoices: 665.4535; 603.5058; 61.94772; The model doesn't say.
+  CorrectAnswer: 665.4535
+  AnswerTests: omnitest(correctVal='665.4535')
+  Hint: 在前面，关于SexMale的估计值是其与截距的距离，所以关于males的截距的线是截距加上males的估计值。
+  
+- Class: mult_question
+  Output: 由于年度的而改变的饥饿的女性的百分数是多少？
+  AnswerChoices: -0.29340; -0.03000; 0.08547; The model doesn't say.
+  CorrectAnswer: -0.29340
+  AnswerTests: omnitest(correctVal='-0.29340')
+  Hint: 关于Year的估计值代表hungry females的百分比随年度的变化.
+
+- Class: mult_question
+  Output: 由于年度的而改变的饥饿的男性的百分数是多少？
+  AnswerChoices: -0.32340; -0.03000; 0.12087; The model doesn't say.
+  CorrectAnswer: -0.32340
+  AnswerTests: omnitest(correctVal='-0.32340')
+  Hint: 关于Year的估计值:SexMale代表年度的变化的hungry males的百分比与年度的变化hungry females的百分比之间的距离.
+
+- Class: figure
+  Output: 现在我们重新画出数据点和两条不同颜色的线用来区分不同的性别。
+  Figure: interactplot.R
+  FigureType: new
+
+- Class: mult_question
+  Output: 以下哪条线是最陡峭的？
+  AnswerChoices: Male; Female; They look about the same
+  CorrectAnswer: Male
+  AnswerTests: omnitest(correctVal='Male')
+  Hint: 线是不平行的，它们最终会相交。更斜的线说明有更快的变化率，哪条线的斜率是与0有明显区别呢？
+  
+- Class: text
+  Output: 最后，我们注意到这些都是一些当我们处理连续型解释变量（不是定性变量）之间相互关系的小技巧。这个幻灯片展示的是基础的代数学，然而我们可以总结。
+  
+- Class: text
+  Output: 假如我有两个相互作用的变量，他们其中一个是保持恒定值的。当因变量的期望变化一个单位时，其他自变量的变化是：变化的自变量的参数值+相互作用的参数值*保持不变的自变量的值。
+  
+- Class: text
+  Output: 假设线性模型是Hi = b0 + (b1*Ii) + (b2*Yi)+ (b3*Ii*Yi) + ei，这里H代表因变量。I's和 Y's是自变量，这两个变量是一个类别的，b's代表自变量估计的参数。我们可以忽略模型的残差e's。由于I和Y都是同一个目录和因素，所以这个模型方程式是连续的交互作用。假设我们改变I里面的某些值，再让Y变化。
+  
+- Class: mult_question
+  Output: 以下哪个方程代表每单位H的变化是由Y和I乘以5修正后所造成的？
+  AnswerChoices: b2+b3*5; b1+5*b3; b0+b2; b2+b3*Y
+  CorrectAnswer: b2+b3*5
+  AnswerTests: omnitest(correctVal='b2+b3*5')
+  Hint: 输出的期望变化是因变量Y的变化的估计值加上相互作用b3*因变量的常数值5的估计值。
+  
+- Class: text
+  Output: 课程结束。

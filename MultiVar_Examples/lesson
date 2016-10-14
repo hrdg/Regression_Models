@@ -1,0 +1,134 @@
+- Class: meta
+  Course: Regression_Models
+  Lesson: MultiVar_Examples
+  Author: Swirl Coders
+  Type: Coursera
+  Organization: Johns Hopkins Bloomberg School of Public Health
+  Version: 2.2.0
+
+- Class: text
+  Output: "'多变量例子1' (Slides for this and other Data Science courses may be found at github https://github.com/DataScienceSpecialization/courses. If you care to use them, they must be downloaded as a zip file and viewed locally. This lesson corresponds to Regression_Models/02_02_multivariateExamples.)"
+
+- Class: text
+  Output: 在这节课中，我们将关注那些多于一个变量的回归方程，我们将从我们已经下载的Swiss数据开始。这个数据是存在于R的数据包里面的。这数据是于1888年收集用以统计瑞士人口变化，和测量瑞士在47个中6个说法语的省份。我们用幻灯片上的编码（R函数组）去画出6乘6组的散点图以表示出成对变量间的关系。在所有的变量中，尤其是生育能力（fertility）是总体的组成部分。例如"Examination"表示军队考试中考到高分的入伍者的百分比，"Education"表示入伍者受过超过初等教育水平的百分比。
+
+- Class: mult_question  
+  Output: 图中，哪一个不被测量的因素？
+  AnswerChoices: Obesity; Catholic; Fertility; Infant Mortality
+  CorrectAnswer: Obesity
+  AnswerTests: omnitest(correctVal='Obesity')
+  Hint: 哪个选项是没有出现在图中的？
+
+- Class: cmd_question
+  Output: 首先用lm函数去产生一个线性模型（all），这个模型Fertility是被解释变量，其他变量是解释变量。使用R的速写法“.”去代替其他五个解释变量在lm中输入，记住数据集是swiss。
+  CorrectAnswer: all <- lm(Fertility ~ ., swiss)
+  AnswerTests: creates_lm_model('all <- lm(Fertility ~ . , swiss)')
+  Hint: 输入 "all <- lm(Fertility ~ ., swiss)" 
+
+- Class: cmd_question
+  Output: 现在用summary去看一下线性模型all的概括。
+  CorrectAnswer: summary(all)
+  AnswerTests: omnitest(correctExpr='summary(all)')
+  Hint: 输入 "summary(all)" 
+
+- Class: text
+  Output: 估计值是线性模型中解释变量的系数（所有的这些都是百分数）他们反映被解释变量随相关解释变量变化时发生的估计的变化。因此，当其他变量保持不变时，每增加1%的男性参与到农业这一职业中，我们就会预测生育能力(fertility)到有0.17的下降。而当其他变量保持不变时，当1%的天主教徒（Catholicism）增加时，我们预测有0.1生育能力(fertility)的提升。
+
+- Class: mult_question
+  Output: 在每行的最远处的"*"说明农业队生育能力的影响是显著的。那么在农业的t的显著性检验中阿尔法的值是多少才能说明农业是显著的呢？
+  AnswerChoices: 0.05; 0.01; 0.1; R doesn't say
+  CorrectAnswer: 0.05
+  AnswerTests: omnitest(correctVal='0.05')
+  Hint: 看到summary输出的 "Signif. codes" 行。
+
+- Class: cmd_question
+  Output: 现在构造另一个线性模型的综述（不要储存在新变量中），这个线性模型中Fertility仅仅取决于农业agriculture。
+  CorrectAnswer: summary(lm(Fertility ~ Agriculture, swiss))
+  AnswerTests: omnitest(correctExpr='summary(lm(Fertility ~ Agriculture, swiss))')
+  Hint: 输入 "summary(lm(Fertility ~ Agriculture, swiss))" 
+
+- Class: mult_question
+  Output: 在新模型中那个是农业agriculture的参数？
+  AnswerChoices: 0.19420; 60.30438; 0.07671; *
+  CorrectAnswer: 0.19420
+  AnswerTests: omnitest(correctVal='0.19420')
+  Hint: 看到在你刚刚产生的数据概括中的 "Estimate" 列和 "Agriculture" 的行对应的数。
+
+
+- Class: text  
+  Output: 有趣的是农业的参数由负数（包含所有变量的模型）变为正数（模型只包含农业这个变量）了。显然易见的，其他因素的存在改变着农业（Agriculture）对(Fertility)的影响方向和程度。
+
+- Class: mult_question
+  Output: 让我们一起思考一些因素之间的关系。你期望教育水平和考试的表现之间的关系是什么呢？
+  AnswerChoices: They would be correlated;  They would be uncorrelated; I would not be able to guess without more information
+  CorrectAnswer: They would be correlated
+  AnswerTests: omnitest(correctVal='They would be correlated')
+  Hint: 当你没有学习和准备的情况下，你会在考试中得到怎样的表现呢？
+
+- Class: cmd_question
+  Output: 现在通过R的cor命令去检验你刚刚的直觉选择了，cor是用来计算Examination和Education的相关系数。 
+  CorrectAnswer: cor(swiss$Examination,swiss$Education)
+  AnswerTests: ANY_of_exprs('cor(swiss$Examination,swiss$Education)','cor(swiss$Education,swiss$Examination)')
+  Hint: 输入 "cor(swiss$Examination,swiss$Education)" 
+
+- Class: cmd_question
+  Output: 0.6984的相关系数表现他们之间是相关的，现在算出Agriculture和Education的相关系数。 
+  CorrectAnswer: cor(swiss$Agriculture,swiss$Education)
+  AnswerTests: ANY_of_exprs('cor(swiss$Agriculture,swiss$Education)','cor(swiss$Education,swiss$Agriculture)')
+  Hint: 输入 "cor(swiss$Agriculture,swiss$Education)" 
+
+- Class: text  
+  Output: Agriculture和Education之间的负相关系数（-0.6395）可能会影响着Agriculture对Fertility的影响。我们会在你们的工作目录中加载获得文件swissLMs.R。在里面函数makelms（）可以构造一系列的线性模型。每个模型都比前一个模型多1个或以上的解释变量。变量Agriculture存在于5个模型中。
+
+
+- Class: cmd_question  
+  Output: 运行函数makelms()去看看模型中增加变量对Agriculture参数的影响。
+  CorrectAnswer: makelms()
+  AnswerTests: omnitest(correctExpr='makelms()')
+  Hint: 输入 "makelms()" .
+
+- Class: mult_question
+  Output: 哪个变量的添加使Agriculture的参数从正变到负？
+  AnswerChoices: Education; Catholic; Examination; Infant.Mortality
+  CorrectAnswer: Education
+  AnswerTests: omnitest(correctVal='Education')
+  Hint: 第三个模型中出现的明显的改变. 在R编码中出现在第三个模型但没出现在第二个模型中的独立变量。
+
+- Class: cmd_question  
+  Output: 现在让我们看看当我们添加不会对模型提供新的线性信息的变量。建立一个变量ec是 swiss中Examination和Catholic的和。
+  CorrectAnswer: ec <- swiss$Examination+swiss$Catholic
+  AnswerTests: ANY_of_exprs('ec <- swiss$Examination+swiss$Catholic','ec <- swiss$Catholic+swiss$Examination')
+  Hint: 输入 "ec <- swiss$Examination+swiss$Catholic"
+
+- Class: cmd_question  
+  Output: 现在构造一个新模型efit，Fertility作为被解释变量，剩下的五个原始变量和ec作为被解释变量。用R的快捷输入“.”+ec作为方程等号的右边。
+  CorrectAnswer: efit <- lm(Fertility ~ . + ec, swiss)
+  AnswerTests: creates_lm_model('efit <- lm(Fertility ~ . + ec, swiss)')
+  Hint: 输入 "efit <- lm(Fertility ~ . + ec, swiss)" 
+
+- Class: text  
+  Output: 我们会看到R会忽略这个新因素，因为这个新因素不会给模型带来新的信息。
+
+- Class: cmd_question  
+  Output: 用第一个模型all的参数减去efit的参数。
+  CorrectAnswer: all$coefficients - efit$coefficients
+  AnswerTests: omnitest(correctExpr='all$coefficients - efit$coefficients')
+  Hint: 输入 "all$coefficients-efit$coefficients" 
+
+
+- Class: mult_question  
+  Output:  Ec的参数是什么？
+  AnswerChoices: NA; 0; I haven't a clue.
+  CorrectAnswer: NA
+  AnswerTests: omnitest(correctVal='NA')
+  Hint: 由于ec是另外两个变量的线性组合，R把它忽略掉所以他的参数是无效（NA）的。
+
+- Class: mult_question  
+  Output:  这告诉我们
+  AnswerChoices: Adding ec doesn't change the model; Adding ec zeroes out the coefficients; R is a really cool 
+  CorrectAnswer: Adding ec doesn't change the model
+  AnswerTests: omnitest(correctVal='Adding ec doesn\'t change the model')
+  Hint: 由于ec是两个变量的线性组合，所以它不会改变模型。
+
+- Class: text
+  Output: 课程结束

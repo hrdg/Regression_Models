@@ -1,0 +1,107 @@
+- Class: meta
+  Course: Regression_Models
+  Lesson: Least_Squares_Estimation
+  Author: Swirl Coders
+  Type: Coursera
+  Organization: Johns Hopkins Bloomberg School of Public Health
+  Version: 2.2.0
+
+- Class: text
+  Output: "最小二乘法估计。 (Slides for this and other Data Science courses may be found at github https://github.com/DataScienceSpecialization/courses. If you care to use them, they must be downloaded as a zip file and viewed locally. This lesson corresponds to Regression_Models/01_03_ols. Galton data is from John Verzani's website, http://wiener.math.csi.cuny.edu/UsingR/)"
+
+- Class: text
+  Output: 在这节课中，如果你是在使用Rstudio,你可以调试一下一些出现在幻灯片上代码。如果你不是在使用RSTUDIO你可以看到代码，但不能用”manipulate”进行实验。我们把代码提供给你，所以你可以测试它而无需把他们都打出来。在Rstudio中当编辑窗中出现编码时，在你按下回车键或其他键盘按钮前，要确保你的闪动光标落在控制台窗口。否则你可能不小心地修改了这些程序。在Rstudio中如果你已经修改了文件，你在编辑器中可以按下Ctrl+Z直到所有非你意愿的修改消失为止。在其他编辑器中，你可以使用诸如此类的组合键去执行”undo”去撤销所有你不想要的改动。
+
+
+
+- Class: figure
+  Output: 这是序章里面所提及的Galton数据及其回归线。回归线综述了父母的高度（自变量）和他们孩子的高度（因变量）之间的关系。
+  Figure: plot1.R
+  FigureType: new
+
+- Class: text
+  Output: 我们在上一个课程中认识到，回归线是一条穿过数据的线，线上的点离数据点有方差最小的特点。也就是说使孩子高度的实际高度和预测的高度间的垂直距离最小。把这些距离进行平方是为了确保位于回归线上的点和线下的点有同一的处理方法。这种选择最佳回归线的方法叫作普通最小二乘法。
+
+- Class: figure
+  Output: 正如幻灯片所显示的，回归线中包含着代表两类高度的均值的点。而这两类高度的均值分别由图上水平和垂直方向的细直线给出，其交点在图上用三角形标出。这点的x轴坐标是父母身高的均值而y轴坐标是孩子身高的均值。 
+  Figure: meanpt.R
+  FigureType: add
+
+- Class: text
+  Output: 如幻灯片所示，回归线的斜率是两高度之间的相关系数乘以其标准差的比率（孩子的身高比父母的身高，或因变量比自变量）。
+
+- Class: figure
+  Output: 这里我们展示出编码是用来说明回归线斜率的改变是如何影响真实值和预测值之间的均方误差的。你会发现这是非常直白简单的。 
+  Figure: demofile.R
+  FigureType: new
+
+- Class: mult_question  
+  Output: Rstudio的图像工具包可以让使用者们去通过数据去发现由改变带来的影响呢？
+  AnswerChoices: manipulate; plot; abline; points
+  CorrectAnswer: manipulate
+  AnswerTests: omnitest(correctVal='manipulate')
+  Hint: 四个选项中的三个都是关于画图的。
+
+- Class: figure
+  Output: 现在你能确确实实地通过编码去使用R的manipulate函数去找到最小方差了。你可以用鼠标的左键去调整滑动条或者用左右方向键去看看到底斜率（bata）的改变会对均方误差造成多少的影响。如果滑动条不见了你可以通过点击plot窗口左上方角落的小齿轮把它唤回来。
+  Figure: sourceit.R
+  FigureType: new
+
+- Class: mult_question  
+  Output:  以下哪个斜率的值能让均方误差最小？
+  AnswerChoices: .64; .44; .70; 5
+  CorrectAnswer: .64
+  AnswerTests: omnitest(correctVal='.64')
+  Hint: 如果你把列表的选项从小到大排列，你可以选择位于中间的一到两个选项。
+
+- Class: mult_question  
+  Output:  最小的mse是什么?
+  AnswerChoices: 5.0; .64; 44; .66
+  CorrectAnswer: 5.0
+  AnswerTests: omnitest(correctVal='5.0')
+  Hint: 你不希望得到一个过大或过小的误差。
+
+- Class: text
+  Output: 把数据标准化先用数据减去他们各自的均值和除以它们的标准差。我们已经为你对galton中的孩子身高和父母身高的数据作了相应的处理。我们把这些标准化后的值储存在两个向量中，分别为gpa nor和gch nor，各自对应标准化后的父母的身高和孩子的身高。
+
+
+- Class: cmd_question
+  Output: 用R的cor函数去计算这些标准化后数据的相关系数。
+  CorrectAnswer: cor(gpa_nor,gch_nor)
+  AnswerTests: ANY_of_exprs('cor(gpa_nor,gch_nor)','cor(gch_nor,gpa_nor)')
+  Hint: 输入"cor(gpa_nor,gch_nor)" 
+
+- Class: mult_question  
+  Output:  这个相关系数与非标准化数据的相关系数有何联系?
+  AnswerChoices: It is the same.; It is bigger.; It is smaller.
+  CorrectAnswer: It is the same.
+  AnswerTests: omnitest(correctVal='It is the same.')
+  Hint: 通过标准化，你有确确实实地改变任何东西吗？
+
+- Class: cmd_question
+  Output: 用lm函数对标准化的数据产生一条回归线，并储存在变了l_nor中。以父母的高度作为自变量，孩子的高度作为因变量。要记住，lm函数需要的参数形式是因变量~自变量。由于我们建立了数据向量，所以没必要再提供第二个想你以前的数据参数了。
+  CorrectAnswer: l_nor <- lm(gch_nor ~ gpa_nor)
+  AnswerTests: omnitest(correctExpr='l_nor <- lm(gch_nor ~ gpa_nor)')
+  Hint: 输入 "l_nor <- lm(gch_nor ~ gpa_nor)" 
+
+- Class: mult_question  
+  Output:  这条线的斜率是多少？
+  AnswerChoices: The correlation of the 2 data sets; I have no idea; 1.
+  CorrectAnswer:  The correlation of the 2 data sets
+  AnswerTests: omnitest(correctVal='The correlation of the 2 data sets')
+  Hint: 考虑到相关性.
+
+- Class: mult_question  
+  Output:  如果把原始数据中（非标准化）自变量跟因变量调转过来，例如用孩子的高度去预测父母的高度，那么新的回归线的斜率将会是多少呢？
+  AnswerChoices: correlation(X,Y) * sd(X)/sd(Y); the same as the original; I have no idea; 1.
+  CorrectAnswer: correlation(X,Y) * sd(X)/sd(Y) 
+  AnswerTests: omnitest(correctVal='correlation(X,Y) * sd(X)/sd(Y)')
+  Hint: 由于你把x跟y交换了位置，也就是说把x与y在方程里面的位置调转了。但在相关性的计算中调换x跟y并没有改变任何东西。
+
+- Class: figure
+  Output: 我们将以幻灯片中源代码的作为最后的陈述。它用数据集galton画出三条回归线，其中红色的线是以孩子的高度作为因变量，新的蓝色线是父母的高度作为因变量而孩子的高度作为自变量，黑色的线是假设相关系数为1的线其斜率为标准差的比值。
+  Figure: demofile2.R
+  FigureType: new
+
+- Class: text
+  Output: 课程结束。

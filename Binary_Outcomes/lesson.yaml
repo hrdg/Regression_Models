@@ -1,0 +1,133 @@
+- Class: meta
+  Course: Regression_Models
+  Lesson: Binary_Outcomes
+  Author: Swirl Coders
+  Type: Coursera
+  Organization: Johns Hopkins Bloomberg School of Public Health
+  Version: 2.2.0
+
+- Class: text
+  Output: "二元结果. (Slides for this and other Data Science courses may be found at github https://github.com/DataScienceSpecialization/courses. If you care to use them, they must be downloaded as a zip file and viewed locally. This lesson corresponds to Regression_Models/03_02_binaryOutcomes.)"
+
+- Class: text
+  Output: 通常地，我们关心的结果有两个值，如存活或死亡，赢或输，胜利或失败。这些结果被称为二元的，伯努利或0/1。在相同协变量数据中一组可变换的二元结果叫做二项结果。（如果他们的顺序不重要，结果是可以互相替换的）
+  
+- Class: text
+  Output: 在这节课程，我们将用glm（）去构造一个二元结果的过程，和一个连续的自变量。我们同时也学习怎样解释glm的参数，和如何找到参数的区间。但我们先要讨论一下“胜算”。
+  
+- Class: text
+  Output: 巴尔的摩乌鸦是橄榄球联盟里面的一直球队。在季后赛他们会赢下2/3的比赛，也就是说他们每赢两场球就输一场。如果我希望对他们的赛果进行打赌，我应该2对1的胜率，如果他们输了我就给你$2，如果他们赢了，你就给我$1。按这样长时间发展下去，我们进行了很多次打赌，我们期望赢得钱也是我们输的钱。
+  
+- Class: mult_question  
+  Output: 在常规赛的时候乌鸦队在比赛中胜出大概为55%。那么我在常规赛的胜率是多少呢？
+  AnswerChoices: 55 to 45; 11 to 9; 1.22222 to 1; Any of these
+  CorrectAnswer: Any of these
+  AnswerTests: omnitest()
+  Hint: 随便选一个.
+
+- Class: text
+  Output: 所有的答案都是正确的，因为他们的比值都是一样。如果p是一件事的概率，那么相应的胜率就是p/(1-p)。
+  
+- Class: figure
+  Output: 现在假设我们想去乌鸦队的胜率是怎样依赖于他们的进攻。换句话说，我们想去对p进行建模，或者写出其函数，这个函数或模型取决于乌鸦队得分点有多少？当然我们不能直接观察p，我们仅仅看到的是胜利，失败和相应的得分。这里是通过一个赛季的观察值画出来的箱形图。
+  Figure: nevermore.R
+  FigureType: new
+
+- Class: mult_question  
+  Output: 我们可以看到乌鸦队得到的分数比较高时他们通常会赢球。事实上，他们有3/4的输球的得分低于某一个值，有3/4的赢球是等于或超过谋划个得分。我在说的是哪个得分呢？（紫色的箱子含有50%的样本，而T只有25%）
+  AnswerChoices: 23;18;30;40
+  CorrectAnswer: 23
+  AnswerTests: omnitest(correctVal='23')
+  Hint: 紫色的箱子"loss"在左边而箱子"win"在右边
+  
+- Class: figure
+  Output: 有9场比赛乌鸦队得到23分然后输掉比赛，同样得分下他们赢了4场，所以我们猜测他们在低于23分下赢得比赛的概率是1/2.
+  Figure: purple_line.R
+  FigureType: add
+
+- Class: cmd_question
+  Output: '有11场比赛乌鸦队得到24以上的分数，他们除了一场外都赢得了比赛。你自己通过查看数据去ravenData检查。输入ravenData或View(ravenData)。'
+  CorrectAnswer: ravenData
+  AnswerTests: ANY_of_exprs('ravenData', 'View(ravenData)')
+  Hint: '输入 ravenData 单独输出数据. 输入 View(ravenData) 输出在分散的窗口.'
+
+- Class: figure
+  Output: 我们看到在23分到28分之间，乌鸦队的输赢转换最为迅速。在得到23分以下的情况，他们只赢了1/2的比赛，在24到28分之间他们赢了3/4的比赛，超过28他们就是全胜。对此，我们对他们得分与赢球概率的关系就有了粗糙的认识。我们得到一个S型的曲线，尽管更像一个涂鸦的S。
+  Figure: graffiti_s.R
+  FigureType: new
+
+- Class: text
+  Output: 当然，我们期望一个真正的平滑的曲线。例如，我们没有想象过乌鸦队有一般赛事得分为0还赢得了比赛，也不会认为他们会在超过28分的情况下赢下所有比赛。一个具有这些特性的广义线性模型假设胜利几率的对数是与得分线性相关。那就是log(p/(1-p)) = b0 + b1*score。连接函数log(p/(1-p))被成为logit，和找到最佳的b0和b1的过程叫做logistic回归。
+  
+- Class: text
+  Output: 最佳的b0和b1是由真实的输赢记录的最大似然（最大可能性）。基于比赛得分，b0和b1给我们一个概率的对数，我们能把几率的对数转换成赢球的概率p。我们希望p是高分赢球，也是低分输球。
+  
+- Class: cmd_question
+  Output: 我们可以用函数glm（）去找出我们的观察值中b0和b1最大可能性。回顾到数据中，我们想通过得分ravenScore去预测两元结果ravenWinNum。这相当于一个公式ravenWinNum ~ ravenScore，是glm的第一个参数。第二个参数是一个族（family），在我们这个案例中是二项式（binomial）。第三个参数是数据集ravenData。在glm上填上这些参数并把结果保存在变量mdl中。
+  CorrectAnswer: 'mdl <- glm(ravenWinNum ~ ravenScore, binomial, ravenData)'
+  AnswerTests: creates_glm_model('mdl <- glm(ravenWinNum ~ ravenScore, binomial, ravenData)')
+  Hint: 用表达式mdl <- glm(ravenWinNum ~ ravenScore, binomial, ravenData) 或 mdl <- glm(ravenWinNum ~ ravenScore, family=binomial, data=ravenData).
+
+- Class: figure
+  Output: 在logistic回归中的估计概率是用黑色曲线表达出来。它比我们在某些方面所估计的曲线更为合理，它对于分数的变化更加光滑，他估计当得到15分的时候乌鸦队有50%的机会赢得比赛，当得到28分时他们有80%的机会赢得比赛，当得到55分时胜率的概率是98%而不是确定赢得比赛。
+  Figure: glm_vs_graffiti.R
+  FigureType: new
+
+- Class: cmd_question
+  Output: 模型在得分低于9的时候可信度更差。当然，没有那个范围的数据。乌鸦队每场得到最少9分，模型中当他们得到9分时有33%的机会获胜，这是合理的。同时模型也认为当他们没有得分的时候也有16%赢得比赛。我们可以用predict()函数去看看模型对于低分的胜率估计。方程把mdl和得分的数据集作为参数，返回的是得分对应的胜率的对数。执行predict(mdl, data.frame(ravenScore=c(0, 3, 6))，并把结果保存在lodds中。
+  CorrectAnswer: 'lodds <- predict(mdl, data.frame(ravenScore=c(0, 3, 6)))'
+  AnswerTests: expr_creates_var('lodds');omnitest('lodds <- predict(mdl, data.frame(ravenScore=c(0, 3, 6)))')
+  Hint: 输入 lodds <- predict(mdl, data.frame(ravenScore=c(0, 3, 6))) 
+
+- Class: cmd_question
+  Output: 由于predict()给我们的是胜率的对数，我们要把它转化为概率，用exp(lodds)/(1+exp(lodds))。不需要把它储存在新的变量中。
+  CorrectAnswer: 'exp(lodds)/(1+exp(lodds))'
+  AnswerTests: omnitest('exp(lodds)/(1+exp(lodds))')
+  Hint: 输入exp(lodds)/(1+exp(lodds)) 
+
+- Class: cmd_question
+  Output: 正如你看到的，有人能用这个模型在打赌中获得很多的钱。当乌鸦队得不到分，模型更偏向16/84的胜率。尽管，正如结果那样模型自己是不明确的。输入summary(mdl)你就能看到两个估计的参数在0的两倍标准差区间内。
+  CorrectAnswer: summary(mdl)
+  AnswerTests: omnitest('summary(mdl)')
+  Hint: 输入 summary(mdl).
+
+- Class: text
+  Output: 几率的对数参数估计是作为得分的线性函数。他们就胜率来说有具有本质上的解释，因为如果b0 + b1*score估计胜率的对数，exp(b0 + b1*score)=exp(b0)exp(b1*score)就可以估计胜率了。因此exp(b0)是估计当得分为0时的胜率（16/84），exp(b1)就是得分每一分增加的时候胜率的增加情况，在这里exp(b1) = exp(0.10658) = 1.11。换句话说，每多的一分胜率增加11%。
+  
+- Class: cmd_question
+  Output: 然而，系数有相对较大的标准误差。95%的置信区间大约是参数的两倍标准差区间。函数confint()可以找到参数b0和b1的95%置信区间的下界和上界。为了得到exp(b0)和exp(b1)相应的置信区间，我们对confint(mdl)的结果取对幂数就可以了。
+  CorrectAnswer: 'exp(confint(mdl))'
+  AnswerTests: omnitest('exp(confint(mdl))')
+  Hint: 输入 exp(confint(mdl)).
+
+- Class: mult_question  
+  Output: 对于0得分点获胜的几率，哪个是它的2.5%的置信边界？
+  AnswerChoices: 0.005674966;0.996229662;2.5%
+  CorrectAnswer: '0.005674966'
+  AnswerTests: omnitest(correctVal= '0.005674966')
+  Hint: 它是很小的.
+
+- Class: mult_question  
+  Output: 得分为0时的胜率置信下界接近于0，这意味着比最大似然模型得到的16/84更加真实。现在看一下exp(b1)的下界，关于ravenScore取幂以后的参数。它认为每增加一分对获胜的几率的影响是什么呢？
+  AnswerChoices: They will decrease slightly;They will increase slightly;They will increase by 30%
+  CorrectAnswer: They will decrease slightly
+  AnswerTests: omnitest(correctVal= 'They will decrease slightly')
+  Hint: 如果你加上正数0.996229662，你会增加或减少一些值吗？
+  
+- Class: text
+  Output: exp(b1)的置信下界表明，没增加一份会让获胜的几率轻微的下降。这明显是不现实的。当然置信区间是基于大样本的假设而我们的样本只有20场比赛。事实上，GLM版本的方程分析会说明如果我们完全忽略分数，我们就不会犯下这些错误。
+  
+- Class: cmd_question
+  Output: 线性回归让观察值和预测值的偏差平方最小，例如使残差的方程最小。如果添加自变量可以显著地缩减残差的方程，这个自变量就是真的好重要。偏差把这个想法扩展到广义线性回归中，用负的似然对数代替方程（关于详细的解释，看到幻灯片和课程）。用anova(mdl)看看我们模型的方差分析。
+  CorrectAnswer: 'anova(mdl)'
+  AnswerTests: omnitest('anova(mdl)')
+  Hint: 输入 anova(mdl).
+
+- Class: cmd_question
+  Output: 'ravenScore的偏差是3.5398与我们含有斜率，和含有截距b0的模型的偏差确实是不同的。这个值是服从自由度为1的卡方分布（在大样本的情况下，自由度为两个参数减去1，或等价于19-18）。原假设是ravenScore的参数为0 。为了确定地拒绝这个假设，我们希望3.5398比自由度为1的卡方分布的95%分位数更大。用qchisq(0.95, 1)计算95%分位数的临界值。'
+  CorrectAnswer: 'qchisq(0.95, 1)'
+  AnswerTests: ANY_of_exprs('qchisq(0.95, 1)', 'qchisq(.95, 1)')
+  Hint: 输入 qchisq(0.95, 1).
+
+- Class: text
+  Output: '正如你看到的，3.5398是接近但是小于95%分位数38.41459，因此被认为在5%的置信水平下是接受原假设假设。换句话说，ravenScore对于刚刚猜想的乌鸦队赢得比赛的几率为70%或者说获胜几率为3/7的贡献是是十分小的。如果你有兴趣你可以通过函数mdl0 <- glm(ravenWinNum ~ 1, binomial, ravenData) 证明这个。到这里二元结果的案例全部结束了。'

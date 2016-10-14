@@ -1,0 +1,133 @@
+- Class: meta
+  Course: Regression Models
+  Lesson: Variance_Inflation_Factors
+  Author: Swirl Coders
+  Type: Coursera
+  Organization: Johns Hopkins Bloomberg School of Public Health
+  Version: 2.2.0
+
+- Class: text
+  Output: "方差膨胀因子. (Slides for this and other Data Science courses may be found at github https://github.com/DataScienceSpecialization/courses. If you care to use them, they must be downloaded as a zip file and viewed locally. This lesson corresponds to Regression_Models/02_04_residuals_variation_diagnostics.)"
+
+- Class: text
+  Output: 在建模中，我们都喜欢尽量节省工作量，可解释的数据表述可以在研究中增加我们对现象认识。省略掉变量会导致参数偏离，除非他们的解释变量与被省去的那个不相关。换句话来说包含某些新变量会增加其他解释变量的标准误差。所以在模型中我们不需要一些没用的变量。这节课是关于这两个问题中的第二个问题的，也叫做方差膨胀。
+  
+- Class: text
+  Output: 我们需要用到模拟实验去解释方程膨胀。这些模拟实验的源代码保存在文件vifSims.R中。代码已经出现在你的种在目录中，也在你的代码编辑器中出现。如果没有显示出来，你也可以手动打开。
+  
+- Class: mult_question  
+  Output: 找到makelms函数，在vifSims.R的顶部。Makelms最后的表达式构造三个线性模型。第一个是lm(y ~ x1)，用x1来预测y；第二个是用x1和x2来预测y；第三个是把三个解释变量都用上了。每个模型的第二个参数（）是提取并返回一个长度为3个单位的向量。第二个参数代表什么呢？
+  AnswerChoices: The coefficient of x1.; The coefficient of the intercept.; The coefficient of x2.
+  CorrectAnswer: The coefficient of x1.
+  AnswerTests: omnitest(correctVal= 'The coefficient of x1.')
+  Hint: 第一个参数是截距，剩下的部分是按公式顺序给出的。
+  
+- Class: mult_question  
+  Output: 在makelms中，模拟的因变量y是依赖于那些解释变量呢？
+  AnswerChoices: x1;x1 and x2;x1, x2, and x3;
+  CorrectAnswer: x1
+  AnswerTests: omnitest(correctVal= 'x1')
+  Hint: 被解释变量y，是由表达式y <- x1 + rnorm(length(x1), sd = .3)组成的。哪个表达式中回归因子x1,x2,x3都有出现呢？
+  
+- Class: mult_question  
+  Output: 在vifSims.R中找出方程rgp1()和rgp2()。两个方程都产生三个解释变量，x1,x2,x3。对比rgp1()中的点A部分和rgp2()中的点C部分，下面哪个陈述是正确的？
+  AnswerChoices: x1, x2, and x3 are uncorrelated in rgp1(), but not in rgp2().;x1, x2, and x3 are correlated in rgp1(), but not in rgp1().;x1, x2, and x3 are uncorrelated in both rgp1() and rgp2().;x1, x2, and x3 are correlated in both rgp1() and rgp2().
+  CorrectAnswer: x1, x2, and x3 are uncorrelated in rgp1(), but not in rgp2().
+  AnswerTests: omnitest(correctVal= 'x1, x2, and x3 are uncorrelated in rgp1(), but not in rgp2().')
+  Hint: 在rgp2()跟着的点C的那一行，x1与x2,x3一起出现在表达式中，而在rgp1（）的点A下的那一行，回归因子是有独立的rnorm()生成的，样本的布同样是正态分布。
+  
+- Class: mult_question  
+  Output: 在rgp1()总的第二点，函数maklms(x1, x2, x3)应用了1000次。在每一次的运行中，它模拟了一个新的因变量y和返回了三个模型（y ~ x1, y ~ x1 + x2, and y ~ x1 + x2+ x3）的x1的参数估计值。它对三个参数产生1000个估计值并把结果收集在一个3*1000的序列beta.在表达式apply(betas, 1, var) 的下一行，应该接着什么？
+  AnswerChoices: Computes the variance of each row.;Computes the variance of each column.
+  CorrectAnswer: Computes the variance of each row.
+  AnswerTests: omnitest(correctVal= 'Computes the variance of each row.')
+  Hint: 我们希望在x1的参数上找出额外添加的变量的影响，达到这个目标我们有3种模型y ~ x1, y ~ x1 + x2, and y ~ x1 + x2 + x3. 三行分别对应的是三个模型，每列对应的是三个模型中为了估计x1的参数而模拟出来的1000种情况，我们关心x1在这三个模型中的参数。
+  
+- Class: cmd_question
+  Output: 函数rgp1()计算三个模型x1参数的估计值的方差(为了方便查看结果四舍五入到小数点后5位)。这个模拟近似于x1在三个方程参数的方差。造成方程膨胀是由于相关的解释变量，而rgp1()里的解释变量是不相关的，运行模拟器rgp1()，它将需要一段运行时长。
+  CorrectAnswer: rgp1()
+  AnswerTests: omnitest(correctExpr='rgp1()')
+  Hint: 输入rgp1() 
+
+- Class: mult_question  
+  Output: 三个方程的方差近似相等，这是符合预期的，这是由于解释变量x2和x3与我们关心的x1是不相关的。然而，在rgp2()中，x2和x3都依赖于x1，所以我们应该期待这会产生不同的效果。在点C中有x2和x3的表达式，哪个与x1有更加强的相关呢？
+  AnswerChoices: x3;x2
+  CorrectAnswer: x3
+  AnswerTests: omnitest(correctVal= 'x3')
+  Hint: 在vifSims.R中，再次看到跟着点C下的线，和注意到在表达式x2的1/sqrt(2)是比在表达式x3中的0.95小的。
+  
+- Class: cmd_question
+  Output: 运行rgp2（）去模拟在这个情况下x1参数的标准误差，这里x1与其他解释变量相关。
+  CorrectAnswer: rgp2()
+  AnswerTests: omnitest(correctExpr='rgp2()')
+  Hint: 输入rgp2() 
+  
+- Class: text
+  Output: 在这个案例中，方程膨胀明显归因于相关的解释变量，在第三个模型(y ~ x1 + x2 + x3)中最为明显，由于x3是与x1相关性最强的因子。
+  
+- Class: text
+  Output: 在这两轮的模拟中，我们有1000个估计参数的样本，所以可以计算样本方差去说明方差膨胀的效果。在真实的事例中，我们只有一组参数和我们依赖于理论上的估计值。然而理论上的估计值包含着一个未知的比例常数。因此我们取决于一个叫做方差膨胀因子VIFs的理论估计值。
+  
+- Class: text
+  Output: 方差膨胀因子是估计方差的一个比值。含有第i个回归量的方差除以含有相关理想回归量（与其他回归量不相关）的方差。VIF可以直接计算出来，但是car包提供一个方便的方法完成计算。我们将用数据swiss进行举例说明。
+  
+- Class: cmd_question
+  Output: 数据集swiss是由标准化的生育指标和社会经济指标组成的，社会经济指标是在1888 年瑞士人口出生率开始下降时于47个瑞士说法语的省份统计的。输入 head(swiss) 和View(swiss)去预检查数据。
+  CorrectAnswer: head(swiss)
+  AnswerTests: ANY_of_exprs('head(swiss)', 'View(swiss)')
+  Hint: 输入 head(swiss) 或 View(swiss) 
+
+- Class: cmd_question
+  Output: Fertility被认为是依赖于其他五个社会学的因素：1、务农男性的百分比2、入伍者得到军队考试的最高成绩的百分比3、入伍者超过基础教育水平的百分比4、信奉罗马天主教信徒占人群百分比5、婴儿的死亡率。以Fertility对五个解释变量进行线性回归。保存在变量mdl中。
+  CorrectAnswer: mdl <- lm(Fertility ~ ., swiss)
+  AnswerTests: creates_lm_model('mdl <- lm(Fertility ~ ., swiss)')
+  Hint: 输入 mdl <- lm(Fertility ~ ., swiss) 
+  
+- Class: cmd_question
+  Output: 用vif(mdl)计算每个解释变量的方差膨胀因子。
+  CorrectAnswer: vif(mdl)
+  AnswerTests: omnitest('vif(mdl)')
+  Hint: 输入vif(mdl) 
+
+- Class: text
+  Output: VIF表示，每个对于回归参数，方差膨胀是由于包含其他所有因素所造成的。例如，Education的估计参数的方差是如果Education与其他解释变量不相关时方差的2.774943倍。由于Education和测试得分是很有可能相关的，我们猜想Education中大多的方程膨胀是源自于其包含了Examination的部分因素。
+
+
+- Class: cmd_question
+  Output: 对Fertility构造第二个线性模型，在这个模型中省略掉Examination，但依然包含其余四个解释变量。把结果保存在mdl2中。
+  CorrectAnswer: mdl2 <- lm(Fertility ~ . -Examination, swiss)
+  AnswerTests: creates_lm_model('mdl2 <- lm(Fertility ~ . -Examination, swiss)')
+  Hint: 输入 mdl2 <- lm(Fertility ~ . -Examination, swiss) 
+  
+- Class: cmd_question
+  Output: 计算这个模型的方差膨胀因子， 用vif(mdl2)。
+  CorrectAnswer: vif(mdl2)
+  AnswerTests: omnitest(correctExpr='vif(mdl2)')
+  Hint: 输入 vif(mdl2) 
+
+- Class: text
+  Output: 如期望的一样，去掉Examination后明显地把Education的方程膨胀因子缩减了，从2.774943缩减到1.816361。注意到把Examination省去了对婴儿死亡率（Infant Mortality）的方程膨胀因子几乎没有改变。有可能是Examination 和 Infant Mortality之间没有强关联。现在，在结束这个课程之前，一起回顾一下几个重点。
+  
+- Class: mult_question  
+  Output: VIF阐述的是由于解释变量间的相关性所造成参数的方法变大的问题。那么对于某个自变量的系数，VIF和标准误差有什么联系呢？
+  AnswerChoices: "VIF is the square of standard error inflation.;They are the same.;There is no relationship."
+  CorrectAnswer: VIF is the square of standard error inflation.
+  AnswerTests: omnitest(correctVal= 'VIF is the square of standard error inflation.')
+  Hint: 方差是标准偏差的平方，标准差是估计参数的标准偏差。
+  
+- Class: mult_question  
+  Output: 如果一个解释变量与其他解释变量强相关，就会增加他们的方程膨胀因子。那么为什么我们做的不是仅仅去排除它们呢？
+  AnswerChoices: "Excluding it might bias coefficient estimates of regressors with which it is correlated.;We should always exclude it.;We should never exclude anything."
+  CorrectAnswer: Excluding it might bias coefficient estimates of regressors with which it is correlated.
+  AnswerTests: omnitest(correctVal= 'Excluding it might bias coefficient estimates of regressors with which it is correlated.')
+  Hint: 排除掉回归因子可以让相关回归因子参数的估计出现偏差。
+  
+- Class: mult_question  
+  Output: 对与把解释变量排除掉所产生的方差膨胀和偏离的问题都涉及到相关的解释变量。有些方法，如因子分析和主成份分析可以把解释变量转变成一个等价的不相关的新变量（设置）。为什么当我们在建模的时候不能仅仅用一些不相关的解释变量去回避所有的麻烦呢？
+  AnswerChoices: "Using converted regressors may make interpretation difficult.; Factor analysis takes too much computation.; We should always use uncorrelated regressors."
+  CorrectAnswer: Using converted regressors may make interpretation difficult.
+  AnswerTests: omnitest(correctVal= 'Using converted regressors may make interpretation difficult.')
+  Hint: 在建模中，我们的兴趣在于简化模型和解释数据的表现，从而在研究中增加我们对现象的认识。
+  
+- Class: text
+  Output: 关于方差膨胀的练习结束。关于其他去除解释变量的问题将会在其他课程继续讨论。

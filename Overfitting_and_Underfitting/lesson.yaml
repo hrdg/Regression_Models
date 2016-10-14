@@ -1,0 +1,156 @@
+- Class: meta
+  Course: Regression Models
+  Lesson: Overfitting and Underfitting
+  Author: Swirl Coders
+  Type: Coursera
+  Organization: Johns Hopkins Bloomberg School of Public Health
+  Version: 2.2.0
+
+- Class: text
+  Output: "过拟合和低度拟合. (Slides for this and other Data Science courses may be found at github https://github.com/DataScienceSpecialization/courses. If you care to use them, they must be downloaded as a zip file and viewed locally. This lesson corresponds to Regression_Models/02_04_residuals_variation_diagnostics.)"
+
+- Class: text
+  Output: 方差膨胀因子的课程里面讲到了加入新的变量将会增加对与新变量相关的其他变量估计参数的方差。因此我们不需要一些无用的变量存在与模型中。另一方面，舍弃一些变量将会引起与被排除的变量相关的解释变量的参数发生偏差。在这节课我们将会说明被排除的变量的英雄和讨论用方差分析去构造一个简化的可解释的数据表达。
+  
+- Class: text
+  Output: 首先，我们举例说明排除一个相关的解释变量是如何使参数的估计发生偏差的。相关的源代码在文件fitting.R中，我把它复制到你的工作目录中和展现在你的代码编辑器中。如果它没有出现，你可以选择手动打开。
+  
+- Class: mult_question  
+  Output: 在fitting.R顶部中找到函数simbias（），在标签点A下定义了三个解释变量，x1,x2,x3。其中哪两个是相关的？
+  AnswerChoices: "x1 and x2;x1 and x3;x2 and x3"
+  CorrectAnswer: "x1 and x2"
+  AnswerTests: omnitest(correctVal= 'x1 and x2')
+  Hint: 变量temp 同时涉及到 x1 和 x2.
+
+- Class: mult_question  
+  Output: 在simbias()的其他函数f(n)，它的被解释变量是y，点c中返回两个模型y ~ x1 + x2, and y ~ x1 + x3中x1的估计参数。在每个模型中各有一个变量是不存在的。在表达式y（点B）中，哪个是x1的参数？
+  AnswerChoices: 1;0.3;1/sqrt(2)
+  CorrectAnswer: 1
+  AnswerTests: omnitest(correctVal= '1')
+  Hint: 在和 x1 + x2 + x3中哪个是x1的参数?
+
+- Class: cmd_question
+  Output: 在simbias()点D中的内部函数f()应用计算150次和返回一个2*150的矩阵。矩阵的第一行包含x1参数的独立估计值，在这里，x3作为一个与x1不相关的解释变量被排除掉。第二行包含排除于x1相关的解释变量x2时x1参数的估计值。用simbias（）填上默认的参数去形成这些估计值并把结果储存在变量x1c中。（默认的参数确保一个接下来的图中出现一个漂亮的直方图）
+  CorrectAnswer: "x1c <- simbias()"
+  AnswerTests: omnitest(correctExpr='x1c <- simbias()')
+  Hint: 输入x1c <- simbias() 
+
+- Class: cmd_question
+  Output: X1真正的参数是1，已经警告过省去一个相关的解释变量会使x1的参数出现偏差。我们期待x1c第二行的参数的平均值会比第一行的参数的平均值远大于1。用apply(x1c, 1, mean)找出每行的均值。
+  CorrectAnswer: apply(x1c, 1, mean)
+  AnswerTests: omnitest(correctExpr='apply(x1c, 1, mean)')
+  Hint: 输入apply(x1c, 1, mean) 
+
+- Class: figure
+  Output: X1c第一行估计值的直方图（蓝色）和其第二行的估计值的直方图（红色）在图像中展示出来了。第二行的估计值明显超过了正确值1两个标准差，这个偏差主要由于是排除的相关解释变量与x1是明显的相关。产生这个图的代码是这个课程附带的，但是可以在fitting.R的底部的函数x1hist进行查看。  
+  Figure: histograms.R
+  FigureType: new
+
+- Class: figure
+  Output: 添加无关的解释变量可能会导致一个模型趋于一个完美拟合。我们将从数据swiss中添加随机的解释变量和逐步添加它们作回归来说明这个问题。正如解释变量的数量接近数据点的数量（47个），残差平方和（也叫做偏差）接近于0.（图的源代码可以在fitting.R的bogus（）函数中找到）。
+  Figure: bogus.R
+  FigureType: new
+
+- Class: text
+  Output: 在图中看到，加入随机的解释变量能降低偏差，但我们会误以为这些降低是显著的。为了去评估它的显著性，我们要考虑到增加唉解释变量减少剩余的自由度。方差分析是量化显著的额外解释变量的有力工具。为了说明它的使用方法，我们将使用数据swiss例证。
+  
+- Class: cmd_question
+  Output: 数据集swiss包含了1888年瑞士标准化的fertility测量和47个说法语的省份的社会指标。Fertility被认为是依赖于截距和五个因子，这五个因子分别为：Agriculture, Examination,Education, Catholic, 和 Infant Mortality。开始我们的方差分析案例，用Fertility对Agriculture进行回归，并保存在变量fit1中。
+  CorrectAnswer: fit1 <- lm(Fertiliy ~ Agriculture, swiss)
+  AnswerTests: creates_lm_model('fit1 <- lm(Fertility ~ Agriculture, swiss)')
+  Hint: 输入 fit1 <- lm(Fertility ~ Agriculture, swiss) 
+  
+- Class: cmd_question
+  Output: 构造另一个模型fit3，用Fertility对Agriculture， Examination和 Education进行回归。
+  CorrectAnswer: fit3 <- lm(Fertility ~ Agriculture + Examination + Education, swiss)
+  AnswerTests: creates_lm_model('fit3 <- lm(Fertility ~ Agriculture + Examination + Education, swiss)')
+  Hint: 输入 fit3 <- lm(Fertility ~ Agriculture + Examination + Education, swiss) 
+  
+- Class: cmd_question
+  Output: '我们现在用方差分析去评价两个新加解释变量的显著性。原假设是添加的解释变量是不显著的。稍后我们将详细解释，但现在只需输入anova(fit1, fit3)进行显著性检验。 '
+  CorrectAnswer: anova(fit1, fit3)
+  AnswerTests: omnitest(correctExpr='anova(fit1, fit3)')
+  Hint: 输入 anova(fit1, fit3) .
+
+- Class: mult_question  
+  Output: 三个星号，在输出界面最下一行，说明在0.001的显著性水平下原假设被拒绝了，所以至少有一两个额外的解释变量是显著的。拒绝原假设是基于F的右侧检验Pr(>F)，适用的F值。在输出表中那一个是F的值？
+  AnswerChoices: 20.968;3102.2;45
+  CorrectAnswer: 20.968
+  AnswerTests: omnitest(correctVal= '20.968')
+  Hint: 这是在输出版面F列下的唯一列。
+
+- Class: mult_question
+  Output: F统计量是由两个平和除以其各自的自由度的比率构造成的。如果两个和都是服从独立的并且都是同方差的卡方分布，统计量就会服从F分布并且参数是两个自由度。在我们的案例中，这两个和是残差平方和，具有零均值和服从卡方分布。至于残差的本身是服从正态分布。两个和由表格中的RSS列给出的，那么他们的值分别是什么？
+  AnswerChoices: 6283.1 and 3180.9;2 and 3102.2;45 and 43
+  CorrectAnswer: 6283.1 and 3180.9
+  AnswerTests: omnitest(correctVal= '6283.1 and 3180.9')
+  Hint: 在anova(fit1, fit3)输出的版面中RSS下的两个数。
+  
+- Class: cmd_question
+  Output: R的函数deviance(model)，计算由作为参数的线性模型的残差平方和，也叫偏差。用deviance(fit3)证明3180.9是fit3的残差平方和。
+  CorrectAnswer: deviance(fit3)
+  AnswerTests: omnitest(correctExpr='deviance(fit3)')
+  Hint: 输入deviance(fit3) 
+
+- Class: cmd_question
+  Output: 在接下来的几步里，我们将展示如何计算出现在anova()输出列表的F的值，20.968。我们先从分母开始，也就是fit3的残差平方和除以它的自由度。Fit3的残差的自由度为43。这个数是用47(swiss的样本量)减去4得到的，而“4”就是fit的自变量的个数（1个为截距，3个变量）。用变量d保存deviance(fit3)/43的值。
+  CorrectAnswer: d <- deviance(fit3)/43
+  AnswerTests: "ANY_of_exprs('d <- deviance(fit3)/43', 'd <- deviance(fit3)/df.residual(fit3)', 'd <- deviance(fit3)/fit3$df.residual')"
+  Hint: 输入 d <- deviance(fit3)/43 
+
+- Class: cmd_question
+  Output: 分子部分是不同的，用deviance(fit1)-deviance(fit3)除以两个残差平方和之间自由度的差，也就是2。我们忽略了这个计算中的一些理论论证，但是本质的思想是fit3比fit1多了两个自变量。把结果计算出来并保存在变量n中。
+  CorrectAnswer: n <- (deviance(fit1) - deviance(fit3))/2
+  AnswerTests: "ANY_of_exprs('n <- (deviance(fit1) - deviance(fit3))/2', 'n <- (deviance(fit1) - deviance(fit3))/(45-43)', 'n <- (deviance(fit1) - deviance(fit3))/(df.residual(fit1)-df.residual(fit3))', 'n <- (deviance(fit1) - deviance(fit3))/(fit1$df.residual - fit3$df.residual)')"
+  Hint: 输入 n <- (deviance(fit1) - deviance(fit3))/2 
+
+- Class: cmd_question
+  Output: 计算比值n/d，看看它与由anova计算出来的F值20.968是否相等。
+  CorrectAnswer: n/d
+  AnswerTests: omnitest(correctExpr='n/d')
+  Hint: 输入 n/d 
+
+- Class: cmd_question
+  Output: 我们现在计算P值，这里的P值是一个在参数为2，43的F分布的条件下，统计量的值大于等于N/D的概率。这个值在anova()的输出版面的Pr(>F)列给出，是4.407e-07。原假设是真的是一个小概率事件。用pf(n/d, 2, 43, lower.tail=FALSE)计算这个值。
+  CorrectAnswer: pf(n/d, 2, 43, lower.tail=FALSE)
+  AnswerTests: omnitest(correctExpr='pf(n/d, 2, 43, lower.tail=FALSE)')
+  Hint: 输入 pf(n/d, 2, 43, lower.tail=FALSE) 
+  
+- Class: cmd_question
+  Output: 基于计算的p值，不去拒绝原价设是不太可能的了。我们有信心相信fit3是比fit1更加的显著，不过有有一个前提：方程分析是对它的假设——模型的残差是否近似正态分布是十分敏感的。如果不是，我们就会得出一个很小的p值。所以需要检测残差值是否正态分布。Shapiro-Wilk检验在R里面可以很快并且很容易实现。服从正态分布是它的原假设。用shapiro.test(fit3$residuals)去检验fit3的残差分布。
+  CorrectAnswer: shapiro.test(fit3$residuals)
+  AnswerTests: ANY_of_exprs('shapiro.test(fit3$residuals)', 'shapiro.test(residuals(fit3))')
+  Hint: 输入 shapiro.test(fit3$residuals) 
+  
+- Class: cmd_question
+  Output: Shapiro-Wilk的p值是0.336，不能拒绝正态分布的原假设，支持我们的方差分析的信任。为了说明anova()在多于两个模型的应用，我构造了fit5和fit6分别用了前五个和全六个变量作为解释变量（包括截距）。因此fit1, fit3, fit5和fit6形成嵌套模型序列。其中一个模型解释变量会被其他模型所包含。输入anova(fit1, fit3, fit5, fit6)。
+  CorrectAnswer: anova(fit1, fit3, fit5, fit6)
+  AnswerTests: omnitest(correctExpr='anova(fit1, fit3, fit5, fit6)')
+  Hint: 输入 anova(fit1, fit3, fit5, fit6) 
+
+- Class: text
+  Output: 明显发现每个模型都比之前的模型有所改良。在结束这个课程之前一起来回顾一下本章重点。
+  
+- Class: mult_question  
+  Output: 排除一个解释变量会使另外一些解释变量的参数估计值出现偏差,具体是哪些解释变量呢？
+  AnswerChoices: Correlated regressors;Uncorrelated regressors
+  CorrectAnswer: Correlated regressors
+  AnswerTests: omnitest(correctVal= 'Correlated regressors')
+  Hint: 另外一个.
+
+- Class: mult_question  
+  Output: 包含更多的解释变量将会坚守模型的残差平方和，即使新的解释变量是不相关的。这个命题是否正确？
+  AnswerChoices: True;False;It depends on circumstances.
+  CorrectAnswer: True
+  AnswerTests: omnitest(correctVal= 'True')
+  Hint: 它不依赖于环境。
+
+- Class: mult_question  
+  Output: 当增加解释变量时，残差平方和的减少应该要通过显著性进行检验，超出变量的需要减少自由度。函数anova（）是以F检验为目标的，还有其他哪些条件用以保证anova()的运用吗？
+  AnswerChoices: "Model residuals should be tested for normality.;Regressors should be tested for normality.;The residuals should be tested for having zero means."
+  CorrectAnswer: Model residuals should be tested for normality.
+  AnswerTests: omnitest(correctVal= 'Model residuals should be tested for normality.')
+  Hint: F检验对于正态性假设十分敏感。
+
+- Class: text
+  Output: 课程结束。

@@ -1,0 +1,192 @@
+- Class: meta
+  Course: Regression Models
+  Lesson: Residuals Diagnostics and Variation
+  Author: Swirl Coders
+  Type: Coursera
+  Organization: Johns Hopkins Bloomberg School of Public Health
+  Version: 2.2.0
+
+- Class: text
+  Output: "残差, 诊断, 变异. (Slides for this and other Data Science courses may be found at github https://github.com/DataScienceSpecialization/courses. If you care to use them, they must be downloaded as a zip file and viewed locally. This lesson corresponds to Regression_Models/02_04_residuals_variation_diagnostics.)"
+
+- Class: figure
+  Output: 在附图中有一个相当明显的异常值。尽管是很明显，但它没有对拟合造成十分大的影响，对此我们可以对比一下黑色的线跟橙色的线。橙色的线是代表用包含异常值作出的回归，而黑色的线是代表用不包含异常值数据作出的回归。就算把异常值包括在数据集里面也不会对拟合有太大的影响，所以说这异常值缺乏影响力。
+  Figure: noninfluential.R
+  FigureType: new
+
+- Class: figure
+  Output: 在下一幅图同样有一个明显的异常值，但在这个事例中异常值对拟合产生巨大的影响。橙线跟黑线的斜率以及残差是迥然不同的。这个异常值是对拟合是有影响的。
+  Figure: influential.R
+  FigureType: new
+
+- Class: text
+  Output: 异常值可能属于数据也可能不属于数据。他们可能是代表真实的事件也可能是假的错乱点。在这里，它们的性质是可以被检验出来的。为了把异常值辨认出来，R提供各种诊断图和对其影响的测试。在这节课我们将会讲解它们的意义和用途。基本的方法是检测去除一个样本点后的影响，正如我们之前比较橙色线和黑色线那样。我们将会用一些有影响明显的异常值作为说明去掉异常值后出现明显的影响。
+  
+- Class: cmd_question
+  Output: 数据out2含有着影响明显的异常值。它有两列，分别是y和x。首先构造一个模型fit用fit <- lm(y ~ x, out2)。
+  CorrectAnswer: fit <- lm(y ~ x, out2)
+  AnswerTests: creates_lm_model('fit <- lm(y ~ x, out2)')
+  Hint: 输入fit <- lm(y ~ x, out2) 
+
+- Class: cmd_question
+  Output: 最简单的诊断图显示残差和拟合值。残差应该是独立的总是符合均值为0的分布，并且与拟合值应该是不相关的。输入plot(fit, which=1)看看这个例子里是否这样。
+  CorrectAnswer: plot(fit, which=1)
+  AnswerTests: omnitest(correctExpr='plot(fit, which=1)')
+  Hint: 输入 plot(fit, which=1)
+  Figure: restore_1.R
+  FigureType: new
+
+- Class: mult_question  
+  Output: 残差明显地与拟合值不同吗？
+  AnswerChoices: Yes;No. There is a linear pattern involving all but one residual and the fit.
+  CorrectAnswer: No. There is a linear pattern involving all but one residual and the fit.
+  AnswerTests: omnitest(correctVal= 'No. There is a linear pattern involving all but one residual and the fit.')
+  Hint: 在所有拟合值与残差间存在明显的线性关系。
+
+- Class: mult_question  
+  Output: 在Residuals vs Fitted图中的用行的名字或数字标记某些特定点。你认为这三个被标记的点中哪个是有影响力的异常值？
+  AnswerChoices: 1;13;50
+  CorrectAnswer: 1
+  AnswerTests: omnitest(correctVal= '1')
+  Hint: 这还是相当有区分度的. 例如, it's far away from the others."
+
+- Class: cmd_question
+  Output: 我们的有影响力的异常点在数据里的第一行，解决这个问题只需用out2[-1, ]作为数据而不用out2作为数据。构造第二个模型，这个模型排除了异常值，并叫做fitno（无异常值拟合）。
+  CorrectAnswer: fitno <- lm(y ~ x, out2[-1, ])
+  AnswerTests: creates_lm_model('fitno <- lm(y ~ x, out2[-1,])')
+  Hint: 输入 fitno <- lm(y ~ x, out2[-1, ]) 
+
+- Class: cmd_question
+  Output: 用fitno画出fitno的Residuals vs Fitted图for fitno，要在后面加which=1.
+  CorrectAnswer: plot(fitno, which=1)
+  AnswerTests: omnitest('plot(fitno, which=1)')
+  Hint: 输入 plot(fitno, which=1) 
+  Figure: restore_2.R
+  FigureType: new
+
+- Class: text
+  Output: 这图相对于第一张图没有了向外扩展的图像。这看起来符合我们所期望的残差与y独立，大致符合均值为0的分布，和与拟合值不相关。
+  
+- Class: cmd_question
+  Output: 由于样本的外因何内因引起的参数变化是一种测试它的影响力大小的简单的方法。用coef(fit)减去coef(fitno)看看由于包含第一个具影响力样本点而引起的变化。
+  CorrectAnswer: coef(fit)-coef(fitno)
+  AnswerTests: ANY_of_exprs('coef(fit)-coef(fitno)', 'fit$coef-fitno$coef', 'fit$coefficients-fitno$coefficients')
+  Hint: 输入 coef(fit)-coef(fitno) 
+
+- Class: cmd_question
+  Output: 函数dfbeta是对于数据中每个样本进行等价的变换计算。Dfbeat（fit）的第一行与我们刚刚计算的不同，而第二行是与第二行样本相似的计算值，如此类推。由于dfbeta返回一个很大的矩阵用head或View函数去检验结果。
+  CorrectAnswer: head(dfbeta(fit))
+  AnswerTests: ANY_of_exprs('head(dfbeta(fit))', 'View(dfbeta(fit))')
+  Hint: 输入 head(dfbeta(fit)) 或 View(dfbeta(fit)) 
+  
+- Class: text
+  Output: 用结果的第一行与之前在它下面行的数据进行比较，我们能看到第一个样本点对斜率（x行）的影响比其他样本点要大。实际上，它的影响的量级是其他点的100倍左右。它对截距的影响在本质上来上不是十分突出，这是因为它的y坐标是零，也就是其他样本的均值。
+  
+- Class: figure
+  Output: 当一个样本点被包含在模型,它会把回归线拉到比不包含它的模型（黑线）更靠近自己的地方（橙色线）。它的残差（真是y值和回归线上的拟合值之间的差异）在包含橙色点时（橙色点延长线）会比不包含橙色点（黑色点延长线）时要小。这两个残差的比值，橙色比黑色，会因存在有影响力的样本点而变得更加小。对于一个没有影响力的样本点这个比值会接近1.因此1减去这个比值所得出的值就是用来检查这个样本点举要的影响力，若这个值接近于0，那么这个点就是没有影响力的，反之。
+  Figure: hatvalues.R
+  FigureType: new
+
+- Class: cmd_question
+  Output: 这个测量度有时候叫做影响，有时候叫做杠杆，也有时候叫做带帽子的值（估计值）。由于它是1减去两个残差的比值，为了去计算它我们必须获得两个残差。比率的分子（橙色点线）是由第一个样本构造的模型fit的残差给出的。模型fitno排除了这个样本点，也排除了关于它的残差，所以我们要计算它的拟合值。这很容易做到，我们用R的预测函数去计算fitno中y的预测值，然后用真实值减去它。用表达式resno <- out2[1, "y"] - predict(fitno, out2[1,])去实现这个计算。
+  CorrectAnswer: resno <- out2[1, "y"] - predict(fitno, out2[1,])
+  AnswerTests: ANY_of_exprs('resno <- out2[1, "y"] - predict(fitno, out2[1,])', "resno <- out2[1, 'y'] - predict(fitno, out2[1,])")
+  Hint: 输入 resno <- out2[1, "y"] - predict(fitno, out2[1,]) 
+
+- Class: cmd_question
+  Output: 现在计算计异常点的影响用1-resid(fit)[1]/resno。
+  CorrectAnswer: 1-resid(fit)[1]/resno
+  AnswerTests: calculates_same_value('1-resid(fit)[1]/resno')
+  Hint: 输入 1-resid(fit)[1]/resno 
+
+- Class: cmd_question
+  Output: 带帽子的值：用函数hatvalues完成对每个样本的计算，这跟你刚刚做的事情一样。因此首先输入hatvalues(fit)去找出你刚刚计算出来的值。由于这里的样本不少，用head(hatvalues(fit)) 或 View(hatvalues(fit))去与一些其他样本比较我们的异常点影响力的测量度。
+  CorrectAnswer: head(hatvalues(fit))
+  AnswerTests: ANY_of_exprs("head(hatvalues(fit))", "View(hatvalues(fit))")
+  Hint: 输入 head(hatvalues(fit)) 或 View(hatvalues(fit)) 
+
+- Class: text
+  Output: 对于单个样本的残差，有时是按照同方差手段进行处理的，也就是说对于整组的残差用整组的样本方差进行估计。然而，理论上来说个别样本的残差是不同方差的，而这些差异会在特异值的面前变大。标准化和学生化残差尝试通过两个截然不同的途径这个影响，但都用到带帽子的值（估计值）。
+  
+- Class: cmd_question
+  Output: 我们将先考虑标准化的残差。首先，计算样本的标准偏差（用fit的偏差除以残差），例如用残差平方和除以自由度再开根号。把结果保存在sigma中。
+  CorrectAnswer: sigma <- sqrt(deviance(fit)/df.residual(fit))
+  AnswerTests: calculates_same_value('sigma <- sqrt(deviance(fit)/df.residual(fit))');expr_creates_var('sigma')
+  Hint: 输入sigma <- sqrt(deviance(fit)/df.residual(fit)) 
+  
+- Class: cmd_question
+  Output: 一般地我们只会用fit的残差（残差的均值为0）除以sigma。在先前的例子中我们用sigma乘以sqrt(1-hatvalues(fit))以估计单个样本的标准误差。因此我们用resid(fit)除以sigma*sqrt(1-hatvalues(fit))而不是除以sigma。结果被成为标准残差，计算fit的标准残差并保存在rstd中。
+  CorrectAnswer: rstd <- resid(fit)/(sigma * sqrt(1-hatvalues(fit)))
+  AnswerTests: calculates_same_value('rstd <- resid(fit)/(sigma * sqrt(1-hatvalues(fit)))');expr_creates_var('rstd')
+  Hint:  输入rstd <- resid(fit)/(sigma * sqrt(1-hatvalues(fit))) 
+
+- Class: cmd_question
+  Output: 函数rstandard，用来计算标准误差，它采用我们刚刚一步一步所得出的算法。用head(cbind(rstd, rstandard(fit))) 或 View(cbind(rstd,rstandard(fit)))去比较这两个计算结果。
+  CorrectAnswer: head(cbind(rstd, rstandard(fit)))
+  AnswerTests: ANY_of_exprs('head(cbind(rstd, rstandard(fit)))', 'View(cbind(rstd, rstandard(fit)))')
+  Hint: 输入head(cbind(rstd, rstandard(fit))) 或 View(cbind(rstd, rstandard(fit))) 
+
+- Class: cmd_question
+  Output: 一个含有尺度和位置参数的图展示的开方根的标准误差对拟合值的图形形式。用plot(fit, which=3)
+  CorrectAnswer: plot(fit, which=3)
+  AnswerTests: omnitest(correctExpr='plot(fit, which=3)')
+  Hint: 输入 plot(fit, which=3) 
+  Figure: restore_3.R
+  FigureType: new
+
+- Class: cmd_question
+  Output: 所有我们讨论的诊断统计都是已经成熟的技术了，由于其他诊断法有其不足指出和它们的分布在零假设的情况下是有固定的特点的。残差是正态分布的假想是隐含着一些特性的。由于标准误差是由个别的剩余方差所调整的，不符合方差为常量的标准残差QQ图是值得研究的。用plot(fit, which=2)画出诊断图。
+  CorrectAnswer: plot(fit, which=2)
+  AnswerTests: omnitest(correctExpr='plot(fit, which=2)')
+  Hint: 输入 plot(fit, which=2) 
+  Figure: restore_4.R
+  FigureType: new
+
+- Class: mult_question  
+  Output: 留意到异常的标准残差值（在QQ图中标记为1），它的平均标准差大概是多少？
+  AnswerChoices: About -5;About -2
+  CorrectAnswer: About -5
+  AnswerTests: omnitest(correctVal= 'About -5')
+  Hint: 这是在它纵轴的位置
+
+- Class: cmd_question
+  Output: 学生化残差（有时叫做外部学生化残差），估计个别残差的标准差，除了对个别戴帽子的值（排除了相关样本后的模型的不正常值）以外。我们将用异常值来举例说明。我们的fitno模型省略了异常的样本点，计算fitno残差的标准样本偏差，方法是用fitno的标准差除以它剩余的自由度后再开方根。把结果保存在sigma1中。
+  CorrectAnswer: sigma1 <- sqrt(deviance(fitno)/df.residual(fitno))
+  AnswerTests: calculates_same_value('sigma1 <- sqrt(deviance(fitno)/df.residual(fitno))');expr_creates_var('sigma1')
+  Hint: 输入 sigma1 <- sqrt(deviance(fitno)/df.residual(fitno)) 
+  
+- Class: cmd_question
+  Output: 计算出异常样本点的标准残差，方法是用fit残差的第一项resid(fit)[1]除以sigma1和sqrt(1-hatvalues(fit)[1])。
+  CorrectAnswer: resid(fit)[1]/(sigma1*sqrt(1-hatvalues(fit)[1]))
+  AnswerTests: calculates_same_value('resid(fit)[1]/(sigma1*sqrt(1-hatvalues(fit)[1]))')
+  Hint: 输入 resid(fit)[1]/(sigma1*sqrt(1-hatvalues(fit)[1])) 
+
+- Class: cmd_question
+  Output: 函数rstudent用来计算每个样本的标准参残差，这个函数的程序与我们刚刚对异常值点做的处理一样。所以rstudent(fit)[1]应该与我们上一个问题中计算的值一样。用head(rstudent(fit)) 或 View(rstudent(fit))去证明这点，再比较异常值点与其他样本点的学生化残差的区别。
+  CorrectAnswer: head(rstudent(fit))
+  AnswerTests: ANY_of_exprs('head(rstudent(fit))', 'View(rstudent(fit))', 'rstudent(fit)')
+  Hint: 输入 head(rstudent(fit))
+
+- Class: text
+  Output: Cook（库克）距离是我们要考虑的最后的影响度量。它本质上来说是拟合值与具有或不具有特别样本点值之间差的平方和。它是以剩余样本方差乘以自变量个数进行标准化（除以剩余样本方差乘以自变量个数），这个案例中自变量有两个x和截距。它从本质上说明了一个给定的样本到底会使模型有多大变化。我们将再次用异常值点进行举例说明库克距离的计算。
+  
+- Class: cmd_question
+  Output: 我们将计算先前已经计算出来fit和fitno各自预测值之间的差，这两个模型分别代表用包含或舍去异常值点进行回归。可以用predict(fitno, out2)减去predict(fit, out2)容易地完成这个任务。把结果保存在变量dy中。
+  CorrectAnswer: dy <- predict(fitno, out2)-predict(fit, out2)
+  AnswerTests: calculates_ANY_value('dy <- predict(fitno, out2)-predict(fit, out2)', 'dy <- predict(fit, out2)-predict(fitno, out2)');expr_creates_var('dy')
+  Hint: 输入dy <- predict(fitno, out2)-predict(fit, out2) 
+  
+- Class: cmd_question
+  Output: 在前面，我们计算了fit残差的样本标准差（sigma）。用dy的平方和除以2*sigma^2去计算异常值点的库克距离。
+  CorrectAnswer: sum(dy^2)/(2*sigma^2)
+  AnswerTests: calculates_same_value('sum(dy^2)/(2*sigma^2)')
+  Hint: 输入 sum(dy^2)/(2*sigma^2) 
+  
+- Class: cmd_question
+  Output: 函数cooks.distance用来计算每个样本带你的库克距离。不去证明，画出用库克距离画出诊断图，用函数plot(fit, which=5)。
+  CorrectAnswer: plot(fit, which=5)
+  AnswerTests: omnitest(correctExpr='plot(fit, which=5)')
+  Hint: 输入 plot(fit, which=5) 
+
+- Class: text
+  Output: 课程结束 

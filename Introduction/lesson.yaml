@@ -1,0 +1,115 @@
+- Class: meta
+  Course: Regression Models
+  Lesson: Introduction
+  Author: Swirl Coders
+  Type: Coursera
+  Organization: Johns Hopkins Bloomberg School of Public Health
+  Version: 2.2.0
+
+- Class: text
+  Output: "回归模型的简介. (Slides for this and other Data Science courses may be found at github https://github.com/DataScienceSpecialization/courses if you want to use them. They must be downloaded as a zip file and viewed locally. This lesson corresponds to Regression_Models/01_01_introduction.)"
+
+- Class: text
+  Output: 这是回归模型课程中的第一课，我们将从“趋向中心回归”的概念开始学习，并且从司法科学之父Francis Galton的一些创始性的研究中来举例说明什么是回归。
+
+- Class: text
+  Output: Francis在寻找父母的高度与孩子的高度之间是否存在相关关系的研究中指出：那些身高高出平均高度的父母所生出来的孩子们的身高也高于平均高度，但只是稍微高出一点而已。同样地，身高低于平均高度的父母所生出来的孩子们的高度低于平均高度水平，但是这些孩子们离平均高度的距离远近于其父母。也就是说，孩子们的身高更贴于近平均高度。下一代的高度比上一代更加逼近平均水平，换句话说高度向均值回归了。
+
+- Class: text
+  Output: 在这节课我们将采用Francis的数据集：“父母/孩子的高度”，我们把这个数据集命名为galton。 (数据来自于 John Verzani的网站, http://wiener.math.csi.cuny.edu/UsingR/.) 现在我们开始学习!
+
+- Class: figure
+  Output: 这是Galton数据的散点图，图中的数据点取集于928对父母/孩子的高度组合；x轴是表示父母的组合高度（由父母高度的平均数计算，而在计算平均数前母亲的高度剩余1.08的调整系数作为调整）。在图中我们用R的自带函数”jitter”作用于孩子们的高度，以强调发生最频繁的高度。每一列的黑点排列左低右高，这说明了孩子的高度依赖于他们父母的高度。身高高的父母的孩子身高也高，反之亦然。
+  Figure: plot1_children_vs_parents.R
+  FigureType: new
+
+- Class: figure
+  Output: 这里我们在散点图中加入了一条红色倾斜45度角（斜率为1截距为0）的直线。如果孩子们的身高趋向与他们父母的组合身高（上文提及）相同，我们就能得到数据点是均匀分布在直线周围的。但我们发现并非如此。在图的左半部分，我们可以看见集中在线上面的点，而在图的右半部分，我们可以看见集中在线下面的点。
+  Figure: plot2_identity_line.R
+  FigureType: add
+
+- Class: figure
+  Output: 现在我们在图上添加一条蓝色的回归线，这条回归线上的点与其他的点之间的方差是最小的(其理论见接下来的章节)。蓝色回归线的斜率比0大说明父母的高度对孩子的高度有正方向的影响。同时，斜率比1小会被看成孩子的高度是否趋向于其父母相同的高度的情况。
+  Figure: plot3_regression_line.R
+  FigureType: add
+
+- Class: cmd_question
+  Output: 现在，你尝试一下在R软件里画图。在R的命令框中输入plot(child ~parent, galton)。
+  CorrectAnswer: plot(child ~ parent, galton)
+  AnswerTests: omnitest(correctExpr='plot(child ~ parent, galton)')
+  Hint: 在R命令框中输入 "plot(child ~ parent, galton)" .
+  Figure: restore_1.R
+  FigureType: new
+
+- Class: text
+  Output: 你会注意到你画出来的图与原始展现出来的图有一定的区别，这是为什么呢。这是因为很多人在测量高度时会因为测量误差而导致测量出相同的高度，而这些点就会一个一个地重合起来，覆盖在另一个点的上面，你可以发现一些圆圈明显比另外一些圆圈黑。
+
+- Class: text
+  Output: 然而，对孩子的身高使用了R里面自带的函数“jitter”后，我们就可以模拟出一系列的测量误差把各数据点展开还原，作出可视性更佳的高频率高度图。
+
+- Class: cmd_question
+  Output: 现在你可以尝试输入"plot(jitter(child,4) ~ parent,galton)"来体会一下它的神奇之处。
+  CorrectAnswer: plot(jitter(child,4) ~ parent,galton)
+  AnswerTests: omnitest(correctExpr='plot(jitter(child,4) ~ parent,galton)')
+  Hint: 继续尝试! 输入 "plot(jitter(child,4) ~ parent,galton)"
+  Figure: restore_2.R
+  FigureType: new
+
+- Class: text
+  Output: 对于R来说，作出回归线是相当简单的。使用函数lm(linear mordel)需要输入公式和数据名称。你可以输入“？formula”去学习更多关于formula的知识。但是，简而言之，我们只需要输入被解析变量（孩子高度）和解析变量（父母高度）就可以了。其形式为：(children's heights) ~(parents' heights)
+
+- Class: cmd_question
+  Output: 作出一条回归线和把它保存在变量 “regrline”中，输入"regrline <- lm(child ~parent, galton)"
+  CorrectAnswer: regrline <- lm(child ~ parent, galton)
+  AnswerTests: omnitest(correctExpr='regrline <- lm(child ~ parent, galton)');expr_creates_var('regrline')
+  Hint: 输入 "regrline <- lm(child ~ parent, galton)"
+
+- Class: cmd_question
+  Output: 接着把回归线添加到图中，可以用用函数“abline”。同时调节线的宽度和颜色（红色），输入"abline(regrline, lwd=3, col='red')"
+  CorrectAnswer: abline(regrline, lwd=3, col='red')
+  AnswerTests: omnitest(correctExpr='abline(regrline, lwd=3, col=\'red\')')
+  Hint:  输入 "abline(regrline, lwd=3, col='red')"
+  Figure: restore_3.R
+  FigureType: add
+
+- Class: cmd_question
+  Output: 回归线的斜率和截距是由数据估算的，而这估算并非是精准的。它们的精准度是有由回归理论技术和标准误差两方面来衡量的。现在，你可以通过summary(regrline)来检查Galton回归线。
+  CorrectAnswer: summary(regrline)
+  AnswerTests: omnitest(correctExpr='summary(regrline)')
+  Hint: 输入 "summary(regrline)"
+
+- Class: mult_question  
+  Output: 曲线的斜率是参数的估计，或者说这斜率是解析变量“parent”（我们的数据中父母的高度）的乘子。在summary的输出结果中，那一项是回归线的斜率呢？
+  AnswerChoices: .64629;.04114;23.94153
+  CorrectAnswer: .64629
+  AnswerTests: omnitest(correctVal= '.64629')
+  Hint: 观察 "parent" 的行和 "Estimate"
+
+- Class: mult_question  
+  Output: 斜率的标准误差是多少呢？
+  AnswerChoices: .64629;.04114;23.94153
+  CorrectAnswer: .04114
+  AnswerTests: omnitest(correctVal= '.04114')
+  Hint: 观察到输出表中标签"parent"的行和它在列"Std. Error."对应的数。
+
+- Class: text
+  Output: 参数将以95%的概率落在其估计值的标准差区间内。这意味着回归方程的斜率是显著异于0和1的，因为0.6429+/-（2*0.04114)是不会接近0或1的。
+
+- Class: figure
+  Output: 现在，我们在图上添加两条蓝色线去进一步解释孩子的高度（横向）和父母的高度（纵向）间的意义。注意到这些添加的辅助线和回归线交于一个点，很奇怪吧？我们将会在后面的课程对其进行进一步的讨论。
+  Figure: plot4_mean_heights.R
+  FigureType: add
+
+- Class: figure
+  Output: 回归线的斜率是用来表示水平方向的变化会引起多少纵向方向的变化。因此，父母高度超出平均水平1英寸其孩子的身高仅仅超出平均水平0.65英寸。也就是说，横向向右移动1英寸的距离（父母的身高增加了）会导致0.65英寸的纵向距离的增加（孩子的高度）。
+  Figure: plot5_triangle1.R
+  FigureType: add
+
+- Class: figure
+  Output: 相似地，父母的身高每1英寸低于平均高度，他们的孩子的身高就低于平均高度0.65英寸，紫色三角形就是用来说明这个意思的。也就是说，横向向左移动1英寸的距离（父母的身高降低了）会导致0.65英寸的纵向距离的减少（孩子的高度）。
+  Figure: plot5_triangle2.R
+  FigureType: add
+
+
+- Class: text
+  Output: 这就是我们趋向中心回归课程的结论，我希望你能学习到更多的知识。
